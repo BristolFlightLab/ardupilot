@@ -532,7 +532,7 @@ private:
     AP_Parachute parachute{relay};
 #endif
 
-    // Button 
+    // Button
 #if BUTTON_ENABLED == ENABLED
     AP_Button button;
 #endif
@@ -780,6 +780,8 @@ private:
 
     // standby.cpp
     void standby_update();
+
+	void send_wind(mavlink_channel_t chan);
 
     // Log.cpp
     void Log_Write_Control_Tuning();

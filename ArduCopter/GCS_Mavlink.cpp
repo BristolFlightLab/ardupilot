@@ -117,7 +117,7 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
     if (!copter.flightmode->in_guided_mode()) {
         return;
     }
-    
+
     const GuidedMode guided_mode = copter.mode_guided.mode();
     Vector3f target_pos;
     Vector3f target_vel;
@@ -138,7 +138,7 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
     mavlink_msg_position_target_local_ned_send(
         chan,
         AP_HAL::millis(), // time boot ms
-        MAV_FRAME_LOCAL_NED, 
+        MAV_FRAME_LOCAL_NED,
         type_mask,
         target_pos.x, // x in metres
         target_pos.y, // y in metres
@@ -266,6 +266,9 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
         break;
 
     case MSG_WIND:
+        CHECK_PAYLOAD_SIZE(WIND);
+        copter.send_wind(chan);
+        break;
     case MSG_SERVO_OUT:
     case MSG_AOA_SSA:
     case MSG_LANDING:
@@ -435,6 +438,7 @@ static const ap_message STREAM_EXTRA3_msgs[] = {
     MSG_AHRS,
     MSG_HWSTATUS,
     MSG_SYSTEM_TIME,
+    MSG_WIND,
     MSG_RANGEFINDER,
     MSG_DISTANCE_SENSOR,
 #if AP_TERRAIN_AVAILABLE && AC_TERRAIN
@@ -523,6 +527,17 @@ void GCS_MAVLINK_Copter::send_banner()
 {
     GCS_MAVLINK::send_banner();
     send_text(MAV_SEVERITY_INFO, "Frame: %s", copter.get_frame_string());
+}
+
+void Copter::send_wind(mavlink_channel_t chan)
+{
+    Vector3f wind = ahrs.wind_estimate();
+    mavlink_msg_wind_send(
+        chan,
+        degrees(atan2f(-wind.y, -wind.x)), // use negative, to give
+                                          // direction wind is coming from
+        wind.length(),
+        wind.z);
 }
 
 // a RC override message is considered to be a 'heartbeat' from the ground station for failsafe purposes
@@ -1249,7 +1264,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
         copter.g2.toy_mode.handle_message(msg);
         break;
 #endif
-        
+
     default:
         handle_common_message(msg);
         break;
