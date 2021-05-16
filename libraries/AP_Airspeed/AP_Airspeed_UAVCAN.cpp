@@ -1,5 +1,7 @@
 #include <AP_HAL/AP_HAL.h>
 
+#include <GCS_MAVLink/GCS.h>
+
 #if HAL_ENABLE_LIBUAVCAN_DRIVERS
 
 #include "AP_Airspeed_UAVCAN.h"
@@ -43,29 +45,41 @@ void AP_Airspeed_UAVCAN::subscribe_msgs(AP_UAVCAN* ap_uavcan)
 
 AP_Airspeed_Backend* AP_Airspeed_UAVCAN::probe(AP_Airspeed &_frontend, uint8_t _instance)
 {
-    WITH_SEMAPHORE(_sem_registry);
-
     AP_Airspeed_UAVCAN* backend = nullptr;
 
-    for (uint8_t i = 0; i < AIRSPEED_MAX_SENSORS; i++) {
-        if (_detected_modules[i].driver == nullptr && _detected_modules[i].ap_uavcan != nullptr) {
-            backend = new AP_Airspeed_UAVCAN(_frontend, _instance);
-            if (backend == nullptr) {
-                AP::can().log_text(AP_CANManager::LOG_INFO, 
-                                      LOG_TAG,
-                                      "Failed register UAVCAN Airspeed Node %d on Bus %d\n",
-                                      _detected_modules[i].node_id,
-                                      _detected_modules[i].ap_uavcan->get_driver_index());
-            } else {
-                _detected_modules[i].driver = backend;
-                AP::can().log_text(AP_CANManager::LOG_INFO, 
-                                      LOG_TAG,
-                                      "Registered UAVCAN Airspeed Node %d on Bus %d\n",
-                                      _detected_modules[i].node_id,
-                                      _detected_modules[i].ap_uavcan->get_driver_index());
+    static const uint32_t probe_timeout = 1000;
+    bool no_messages_received = true;
+    const uint32_t time_probe_start = AP_HAL::millis();
+
+    while (no_messages_received && (AP_HAL::millis()-time_probe_start < probe_timeout)) {
+        for (uint8_t i = 0; i < AIRSPEED_MAX_SENSORS; i++) {
+            WITH_SEMAPHORE(_sem_registry);
+
+            if (_detected_modules[i].driver == nullptr && _detected_modules[i].ap_uavcan != nullptr) {
+                no_messages_received = false;
+                backend = new AP_Airspeed_UAVCAN(_frontend, _instance);
+                if (backend == nullptr) {
+                    AP::can().log_text(AP_CANManager::LOG_INFO, 
+                                        LOG_TAG,
+                                        "Failed register UAVCAN Airspeed Node %d on Bus %d\n",
+                                        _detected_modules[i].node_id,
+                                        _detected_modules[i].ap_uavcan->get_driver_index());
+                } else {
+                    _detected_modules[i].driver = backend;
+                    AP::can().log_text(AP_CANManager::LOG_INFO, 
+                                        LOG_TAG,
+                                        "Registered UAVCAN Airspeed Node %d on Bus %d\n",
+                                        _detected_modules[i].node_id,
+                                        _detected_modules[i].ap_uavcan->get_driver_index());
+                }
+                break;
             }
-            break;
         }
+        hal.scheduler->delay(50);
+    }
+
+    if (backend == nullptr) {
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "Possible timeout waiting for UAVCAN airspeed");
     }
 
     return backend;
