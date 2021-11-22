@@ -227,6 +227,10 @@ bool MLController::throttle_is_cut() const {
 
 void MLController::throttle_freeze() {
 	throttleFrozen = true;
+	if( throttleAverageTime < 0.1 ) {
+		// Throttle averaging disabled, skip computation
+		return;
+	}
 	// Calculate the average throttle value
 	int nReadings = throttleAverageTime / 0.1;
 	int32_t sum = 0.0;
@@ -235,6 +239,7 @@ void MLController::throttle_freeze() {
 		sum += throttleReadings[index];
 		}
 	averageThrottle = sum / nReadings;
+	gcs().send_text(MAV_SEVERITY_INFO, "[MLAgent] Average throttle at freeze = %i ", averageThrottle);
 	}
 
 void MLController::update_throttle(float throttle) {
