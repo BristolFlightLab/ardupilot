@@ -411,6 +411,10 @@ void Plane::stabilize()
         if (g.stick_mixing == STICK_MIXING_FBW && control_mode != &mode_stabilize) {
             stabilize_stick_mixing_fbw();
         }
+        if( experimental_mode_enabled ) {
+            // Stabilize around 0 roll
+            nav_roll_cd = 0;
+        }
         stabilize_roll(speed_scaler);
         if( experimental_mode_enabled ) {
             // Update elevator and sweep based on ML rates
