@@ -484,8 +484,14 @@ void Plane::calc_throttle()
         commanded_throttle = plane.guided_state.forced_throttle;
     }
 
-    if( experimental_mode_enabled && g2.mlController.throttle_is_cut() ) {
-        commanded_throttle = 0.0;
+    if( experimental_mode_enabled ) {
+        int32_t expr_throttle = g2.mlController.get_experiment_throttle();
+        if(expr_throttle >= 0) {
+            commanded_throttle = expr_throttle;    
+        }
+        if( g2.mlController.throttle_is_cut() ) {
+            commanded_throttle = 0;
+        }
     }
 
     SRV_Channels::set_output_scaled(SRV_Channel::k_throttle, commanded_throttle);

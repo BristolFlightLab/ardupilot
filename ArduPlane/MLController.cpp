@@ -2,6 +2,7 @@
 
 void Plane::update_ml_controller(void) {
 	g2.mlController.send_state();
+	g2.mlController.update_throttle(SpdHgt_Controller->get_throttle_demand());
 	}
 
 #include "MLController.h"
@@ -26,6 +27,15 @@ const struct AP_Param::GroupInfo MLController::var_info[] = {
     // @User: User
 	AP_GROUPINFO("DEG2OUT", 2, MLController, deg2output, 100.0),
 	
+	// @Param: MLCTRL_THRAVGT
+    // @DisplayName: Time to average throttle over
+    // @Description: Set time to average throttle over when using the average throttle mode. Set to zero to use standard mode
+	// @Range: 0 10
+    // @Increment: 0.1
+    // @User: User
+	// @Unit: s
+	AP_GROUPINFO("THRAVGT", 3, MLController, throttleAverageTime, 0.0),
+	
 	AP_GROUPEND
 	};
 
@@ -42,7 +52,11 @@ MLController::MLController()
 	  sweepAngleUninitialised(true),
 	  episodeIsComplete(false),
 	  in_progress(false),
-	  throttleCut(true)
+	  throttleCut(true),
+	  throttleFrozen(false),
+	  averageThrottle(0),
+	  throttleReadings{0},
+	  throttleReadingIndex(0)
 	{
 	}
 
@@ -109,10 +123,12 @@ void MLController::send_state() {
 	
 	// Send message to agent
 	if( lookupSuccess ) {
-		// gcs().send_text(MAV_SEVERITY_ERROR, "[MLAgent] S: %i A: %i", stateSend_ms, actionRecv_ms);
-			mavlink_msg_mlagent_state_send_struct(agent_channel,&state);
-		// stateSend_ms = millis();
 #ifdef MLDEBUG
+		gcs().send_text(MAV_SEVERITY_ERROR, "[MLAgent] S: %i A: %i", stateSend_ms, actionRecv_ms);
+#endif
+		mavlink_msg_mlagent_state_send_struct(agent_channel,&state);
+#ifdef MLDEBUG
+		stateSend_ms = millis();
 		gcs().send_text(MAV_SEVERITY_INFO, "MLAGENT_STATE sent to %i", agent_channel);
 #endif
 		}
@@ -127,6 +143,8 @@ void MLController::reset() {
 	elev_rate = 0.0;
 	lastControlTime = millis();
 	throttleCut = false;
+	throttleFrozen = false;
+	averageThrottle = 0;
 	}
 
 // For elevator:
@@ -194,8 +212,9 @@ void MLController::handle_message(const mavlink_message_t& message) {
 	// Update rate based on message from agent
 	elev_rate = action_msg.elevator;
 	sweep_rate = action_msg.sweep;
-	
-	// actionRecv_ms = millis();
+#ifdef MLDEBUG
+	actionRecv_ms = millis();
+#endif
 	}
 
 bool MLController::is_complete() const {
@@ -204,4 +223,32 @@ bool MLController::is_complete() const {
 
 bool MLController::throttle_is_cut() const {
 	return throttleCut;
+	}
+
+void MLController::throttle_freeze() {
+	throttleFrozen = true;
+	// Calculate the average throttle value
+	int nReadings = throttleAverageTime / 0.1;
+	int32_t sum = 0.0;
+	for( int i = nReadings; i > 0; i--) {
+		uint8_t index = (MAX_READINGS + throttleReadingIndex - i) % MAX_READINGS;
+		sum += throttleReadings[index];
+		}
+	averageThrottle = sum / nReadings;
+	}
+
+void MLController::update_throttle(float throttle) {
+	if(!throttleFrozen) {
+		throttleReadings[throttleReadingIndex] = throttle;
+		throttleReadingIndex = (throttleReadingIndex + 1) % MAX_READINGS;
+		}
+	}
+
+int32_t MLController::get_experiment_throttle() {
+	if( throttleAverageTime < 0.1 ) {
+		return -1;
+		}
+	else {
+		return averageThrottle;
+		}
 	}

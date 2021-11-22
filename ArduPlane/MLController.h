@@ -45,11 +45,20 @@ class MLController {
 
 		AP_Float output2deg;
 		AP_Float deg2output;
-		
-		// long int actionRecv_ms;
-		// long int stateSend_ms;
-	
+		AP_Float throttleAverageTime;
+
+#ifdef MLDEBUG		
+		long int actionRecv_ms;
+		long int stateSend_ms;
+#endif
+
 		bool throttleCut;
+
+#define MAX_READINGS 100
+		bool throttleFrozen;
+		int32_t averageThrottle;
+		int32_t throttleReadings[MAX_READINGS];
+		uint8_t throttleReadingIndex;
 
 	public:
 		// Parameter info
@@ -87,5 +96,15 @@ class MLController {
 
 		// Has throttle been cut for current episode
 		bool throttle_is_cut() const;
+		
+		// Freeze throttle updater
+		void throttle_freeze();
+		
+		// Update internal throttle average with new reading
+		void update_throttle(float throttle);
+		
+		// Return the current experiment throttle
+		// Will return <0.0 if controller throttle should be used
+		int32_t get_experiment_throttle();
 
 	};
