@@ -142,6 +142,66 @@ const AP_Param::GroupInfo AP_TemperatureSensor::var_info[] = {
     AP_SUBGROUPVARPTR(drivers[8], "9_", 27, AP_TemperatureSensor, backend_var_info[8]),
 #endif
 
+#if AP_TEMPERATURE_SENSOR_MAX_INSTANCES >= 10
+    // @Group: A_
+    // @Path: AP_TemperatureSensor_Params.cpp
+    AP_SUBGROUPINFO(_params[9], "A_", 30, AP_TemperatureSensor, AP_TemperatureSensor_Params),
+
+    // @Group: A_
+    // @Path: AP_TemperatureSensor_Analog.cpp
+    AP_SUBGROUPVARPTR(drivers[9], "A_", 31, AP_TemperatureSensor, backend_var_info[9]),
+#endif
+
+#if AP_TEMPERATURE_SENSOR_MAX_INSTANCES >= 11
+    // @Group: B_
+    // @Path: AP_TemperatureSensor_Params.cpp
+    AP_SUBGROUPINFO(_params[10], "B_", 32, AP_TemperatureSensor, AP_TemperatureSensor_Params),
+
+    // @Group: B_
+    // @Path: AP_TemperatureSensor_Analog.cpp
+    AP_SUBGROUPVARPTR(drivers[10], "B_", 33, AP_TemperatureSensor, backend_var_info[10]),
+#endif
+
+#if AP_TEMPERATURE_SENSOR_MAX_INSTANCES >= 12
+    // @Group: C_
+    // @Path: AP_TemperatureSensor_Params.cpp
+    AP_SUBGROUPINFO(_params[11], "C_", 34, AP_TemperatureSensor, AP_TemperatureSensor_Params),
+
+    // @Group: C_
+    // @Path: AP_TemperatureSensor_Analog.cpp
+    AP_SUBGROUPVARPTR(drivers[11], "C_", 35, AP_TemperatureSensor, backend_var_info[11]),
+#endif
+
+#if AP_TEMPERATURE_SENSOR_MAX_INSTANCES >= 13
+    // @Group: D_
+    // @Path: AP_TemperatureSensor_Params.cpp
+    AP_SUBGROUPINFO(_params[12], "D_", 36, AP_TemperatureSensor, AP_TemperatureSensor_Params),
+
+    // @Group: D_
+    // @Path: AP_TemperatureSensor_Analog.cpp
+    AP_SUBGROUPVARPTR(drivers[12], "D_", 37, AP_TemperatureSensor, backend_var_info[12]),
+#endif
+
+#if AP_TEMPERATURE_SENSOR_MAX_INSTANCES >= 14
+    // @Group: E_
+    // @Path: AP_TemperatureSensor_Params.cpp
+    AP_SUBGROUPINFO(_params[13], "E_", 38, AP_TemperatureSensor, AP_TemperatureSensor_Params),
+
+    // @Group: E_
+    // @Path: AP_TemperatureSensor_Analog.cpp
+    AP_SUBGROUPVARPTR(drivers[13], "E_", 39, AP_TemperatureSensor, backend_var_info[13]),
+#endif
+
+#if AP_TEMPERATURE_SENSOR_MAX_INSTANCES >= 15
+    // @Group: F_
+    // @Path: AP_TemperatureSensor_Params.cpp
+    AP_SUBGROUPINFO(_params[14], "F_", 40, AP_TemperatureSensor, AP_TemperatureSensor_Params),
+
+    // @Group: F_
+    // @Path: AP_TemperatureSensor_Analog.cpp
+    AP_SUBGROUPVARPTR(drivers[14], "F_", 41, AP_TemperatureSensor, backend_var_info[14]),
+#endif
+
     AP_GROUPEND
 };
 
