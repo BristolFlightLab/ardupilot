@@ -290,6 +290,12 @@ const AP_Param::GroupInfo AP_Vehicle::var_info[] = {
     AP_SUBGROUPINFO(rpm_sensor, "RPM", 32, AP_Vehicle, AP_RPM),
 #endif
 
+#if AP_ELECTRICAL_SENSOR_ENABLED
+    // @Group: ELEC
+    // @Path: ../AP_ElectricalSensor/AP_ElectricalSensor.cpp
+    AP_SUBGROUPINFO(electrical_sensor, "ELEC", 33, AP_Vehicle, AP_ElectricalSensor),
+#endif
+
     AP_GROUPEND
 };
 
@@ -497,6 +503,10 @@ void AP_Vehicle::setup()
     temperature_sensor.init();
 #endif
 
+#if AP_ELECTRICAL_SENSOR_ENABLED
+    electrical_sensor.init();
+#endif
+
 #if AP_KDECAN_ENABLED
     kdecan.init();
 #endif
@@ -668,6 +678,9 @@ const AP_Scheduler::Task AP_Vehicle::scheduler_tasks[] = {
 #endif
 #if AP_TEMPERATURE_SENSOR_ENABLED
     SCHED_TASK_CLASS(AP_TemperatureSensor, &vehicle.temperature_sensor, update,        5, 50, 242),
+#endif
+#if AP_ELECTRICAL_SENSOR_ENABLED
+    SCHED_TASK_CLASS(AP_ElectricalSensor, &vehicle.electrical_sensor, update,        5, 50, 242),
 #endif
 #if HAL_INS_ACCELCAL_ENABLED
     SCHED_TASK(accel_cal_update,                                                      10, 100, 245),
