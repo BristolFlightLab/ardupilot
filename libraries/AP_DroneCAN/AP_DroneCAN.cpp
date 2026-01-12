@@ -61,6 +61,7 @@
 #endif
 
 #include <AP_TemperatureSensor/AP_TemperatureSensor_DroneCAN.h>
+#include <AP_ElectricalSensor/AP_ElectricalSensor_DroneCAN.h>
 
 #include <AP_RPM/RPM_DroneCAN.h>
 
@@ -404,6 +405,9 @@ void AP_DroneCAN::init(uint8_t driver_index)
 #endif
 #if AP_TEMPERATURE_SENSOR_DRONECAN_ENABLED
     subscribed = subscribed && AP_TemperatureSensor_DroneCAN::subscribe_msgs(this);
+#endif
+#if AP_ELECTRICAL_SENSOR_DRONECAN_ENABLED
+    subscribed = subscribed && AP_ElectricalSensor_DroneCAN::subscribe_msgs(this);
 #endif
 #if AP_RPM_DRONECAN_ENABLED
     subscribed = subscribed && AP_RPM_DroneCAN::subscribe_msgs(this);

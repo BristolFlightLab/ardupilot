@@ -64,6 +64,8 @@ class ExtractFeatures(BuildScriptBase):
             ('AP_TEMPERATURE_SENSOR_ENABLED', 'AP_TemperatureSensor::AP_TemperatureSensor',),
             ('AP_TEMPERATURE_SENSOR_{type}_ENABLED', 'AP_TemperatureSensor_(?P<type>.*)::update',),
 
+            ('AP_ELECTRICAL_SENSOR_ENABLED', 'AP_ElectricalSensor::AP_ElectricalSensor',),
+
             ('AP_BEACON_ENABLED', 'AP_Beacon::AP_Beacon',),
             ('HAL_TORQEEDO_ENABLED', 'AP_Torqeedo::AP_Torqeedo'),
 
