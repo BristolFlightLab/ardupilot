@@ -129,8 +129,9 @@ protected:
         ASP5033  = 0x0A,
         AUAV     = 0x0B,
         SCRIPTING = 0x0C,
+        NDXXX    = 0x0D,
     };
-    
+
 private:
     AP_Airspeed &frontend;
     uint8_t instance;
