@@ -70,6 +70,7 @@ private:
     void timer();
 
     Model get_model();
+    char const* get_model_string() const;
     bool probe(uint8_t address);
     void setup();
 

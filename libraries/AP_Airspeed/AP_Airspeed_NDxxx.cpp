@@ -51,6 +51,12 @@ bool AP_Airspeed_NDxxx::probe(uint8_t address)
     return _model != Model::Unknown;
 }
 
+static char const model_string_ND210[] = "ND210";
+static char const model_string_ND110[] = "ND110";
+static char const model_string_ND120[] = "ND120";
+static char const model_string_ND130[] = "ND130";
+static char const model_string_ND005D[] = "ND005D";
+
 Model AP_Airspeed_NDxxx::get_model()
 {
     uint8_t result[12];
@@ -60,22 +66,40 @@ Model AP_Airspeed_NDxxx::get_model()
     }
 
     const char* model = reinterpret_cast<char*>(&result[4]);
-    if (strcmp(model, "ND210") == 0) {
+    if (strcmp(model, model_string_ND210) == 0) {
         return Model::ND210;
     }
-    if (strcmp(model, "ND110") == 0) {
+    if (strcmp(model, model_string_ND110) == 0) {
         return Model::ND110;
     }
-    if (strcmp(model, "ND120") == 0) {
+    if (strcmp(model, model_string_ND120) == 0) {
         return Model::ND120;
     }
-    if (strcmp(model, "ND130") == 0) {
+    if (strcmp(model, model_string_ND130) == 0) {
         return Model::ND130;
     }
-    if (strcmp(model, "ND005D") == 0) {
+    if (strcmp(model, model_string_ND005D) == 0) {
         return Model::ND005D;
     }
     return Model::Unknown;
+}
+
+char const* AP_Airspeed_NDxxx::get_model_string() const {
+    switch (_model) {
+        case Model::ND210:
+            return model_string_ND210;
+        case Model::ND110:
+            return model_string_ND110;
+        case Model::ND120:
+            return model_string_ND120;
+        case Model::ND130:
+            return model_string_ND130;
+        case Model::ND005D:
+            return model_string_ND005D;
+        default:
+            return "Unknown";
+    }
+
 }
 
 // probe and initialise the sensor
@@ -98,7 +122,7 @@ bool AP_Airspeed_NDxxx::init()
         found = probe(addresses[i]);
 
         if (found) {
-            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "NDxxx AIRSPEED[%u]: Found bus %u addr 0x%02x", get_instance(), _dev->bus_num(), _dev->get_bus_address());
+            GCS_SEND_TEXT(MAV_SEVERITY_INFO, "NDxxx AIRSPEED[%u]: Found %s bus %u addr 0x%02x", get_instance(), get_model_string(), _dev->bus_num(), _dev->get_bus_address());
             break;
         }
     }
